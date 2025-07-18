@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  password     String
+  role         Role       @default(CLIENT)
+  refreshToken String?
+  shipments    Shipment[] @relation("ClientShipments")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Shipment {
+  id        Int                @id @default(autoincrement())
+  title     String
+  status    ShipmentStatus     @default(CREATED)
+  client    User               @relation("ClientShipments", fields: [clientId], references: [id])
+  clientId  Int
+  drivers   DriverOnShipment[]
+  route Route?
+  tracking TrackingUpdate[]
+  invoice Invoice?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model Driver {
+  id        Int                @id @default(autoincrement())
+  name      String
+  shipments DriverOnShipment[]
+}
+
+model DriverOnShipment {
+  shipment   Shipment @relation(fields: [shipmentId], references: [id])
+  shipmentId Int
+  driver     Driver   @relation(fields: [driverId], references: [id])
+  driverId   Int
+
+  @@id([shipmentId, driverId])
+}
+
+model Route {
+  id Int @id @default(autoincrement())
+  fromCity City @relation("FromCity", fields:[fromCityId],references: [id])
+  fromCityId Int
+  toCity City @relation("ToCity", fields: [toCityId],references: [id])
+  toCityId Int
+  shipment Shipment @relation(fields: [shipmentId], references: [id])
+  shipmentId Int @unique
+}
+
+model City {
+  id Int @id @default(autoincrement())
+  name String
+  fromRoutes Route[] @relation("FromCity")
+  toRoutes Route[] @relation("ToCity")
+}
+
+model TrackingUpdate {
+  id Int @id @default(autoincrement())
+  status ShipmentStatus 
+  timestamp DateTime @default(now())
+  shipment Shipment @relation(fields: [shipmentId], references: [id])
+  shipmentId Int
+}
+
+model Invoice {
+  id Int @id @default(autoincrement())
+  amount Float 
+  shipment Shipment @relation(fields: [shipmentId], references: [id])
+  shipmentId Int @unique
+  createdAt DateTime @default(now())
+}
+
+enum ShipmentStatus {
+  CREATED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  DRIVER
+  CLIENT
+}
