@@ -18,3 +18,34 @@ An advanced REST API for managing shipping API:
 
 ---
 
+## 🚀 Getting Started
+
+### Installation
+```bash
+git clone https://github.com/mhammadshami/shipment-api.git
+cd shipment-api
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+npm run start:dev
+```
+### Environment Variables
+```
+DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/shipping_db
+JWT_SECRET=your_jwt_secret
+```
+
+---
+
+## 🔐 Authentication & Authorization
+- ✅ Access Token + Refresh Token sytem
+- ✅ Role-Based Access Control with Guards
+- ✅ Protected Endpoints
+
+---
+
+## 📖 API Documentation (Swagger)
+Access via:
+``` 
+http://localhost:3000/api-docs
+```
